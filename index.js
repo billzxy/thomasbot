@@ -1,44 +1,59 @@
 const Discord = require("discord.js");
+const TTSPlayer = require('./functions/tts/classes/TTSPlayer');
 require('dotenv').config();
 
+const r6shuffle = require('./functions/r6shuffle');
+const utils = require("./functions/utils");
+const fs = require('fs');
+const path = require('path');
+
 const TOKEN = process.env.DISCORD_TOKEN;
-var bot = new Discord.Client();
-
 const PREFIX = "thomas";
+const TTS_PREFIX = process.env.PREFIX;
 
-const R6ROUGE = "435634221277773844";
-const R6BLEU = '438091004566962177';
+const THOMAS_ID = "229701039144697858";
+let exclusive = false;
+const EXCLUSIVE_MILLIS = 10000;
+let exclusiveClock = null;
+let bindID = THOMAS_ID;
 
-const VCTEST1 = "449019484766732291";
-const VCTEST2 = "697523734474391573";
+const bot = new Discord.Client();
+bot.commands = new Discord.Collection();
 
-let playerList = [];
-let memberMap = new Map();
-let teamR = [];
-let teamB = [];
-let inProgress = false;
+const commandsPath = path.join(__dirname, 'functions/tts/tts-commands');
+const commandFiles = fs.readdirSync(commandsPath);
+commandFiles.forEach((file) => {
+	const command = require(path.join(commandsPath, file));
+	bot.commands.set(command.name, command);
+});
 
 bot.on("ready",function(){
 	console.log("Thomas is ready for commands!");
+	bot.guilds.cache.each((guild) => {
+		guild.ttsPlayer = new TTSPlayer(guild);
+	});
 	bot.user.setActivity("cmds: thomas help/info",{type:"LISTENING"});
 });
 
+bot.on("error", (error) =>console.log(error));
+
 //main loop
 bot.on("message", function(message){
+	let toWhomID = message.author.id;
+
 	if(message.author.equals(bot.user))
 		return;
 
-	if(!message.content.startsWith(PREFIX))
+	if(!message.content.startsWith(PREFIX) && !message.content.startsWith(TTS_PREFIX) && !(exclusive && toWhomID===bindID))
 		return;
 
 	if(message.content === PREFIX){
-		message.channel.send("Meww!").then(consoleLog(message)).catch(console.error);
+		message.channel.send("Meww!").then(utils.consoleLog(message)).catch(console.error);
 		return;
 	}
 
 	if(message.content.substring(0,7) === "thomas "){
 		let args = message.content.substring(7,).split(" ");
-		let toWhomID = message.author.id;
 		switch(args[0]){
 			case "help":
 				message.channel.send('Commands:\n'+
@@ -47,8 +62,9 @@ bot.on("message", function(message){
 					'thomas hello\n'+
 					'thomas bless\n'+
 					'thomas 5v5\\divide\\move\\gather\\reset\n'+
+					'thelp for TTS commands\n'+
 					"----------------------------\n"+
-					"Miao is still learning moar!").then(consoleLog(message))
+					"Miao is still learning moar!").then(utils.consoleLog(message))
 				.catch(console.error);
 				break;
 
@@ -59,60 +75,86 @@ bot.on("message", function(message){
 			case "info":
 				sendInfo(message);
 				break;
+
+			case "meow":
+				meow(message);
+				break;
 			
 			case "5v5":
-				fiveVFive(message);
+				r6shuffle.fiveVFive(message);
 				break;
 
 			case "divide":
-				assignTeam(message);
+				r6shuffle.assignTeam(message);
 				break;
 
 			case "move":
-				moveIntoVC(message);
+				r6shuffle.moveIntoVC(message);
 				break;
 
 			case "gather":
-				gatherUp(message);
+				r6shuffle.gatherUp(message);
 				break;
 
 			case "reset":
-				clearList(message);
+				r6shuffle.clearList(message);
 				break;
 
 			case "bless":
 				bless(toWhomID, message);
 				break;
 
+			case "exclusive":
+				switchExclusiveMode(toWhomID, message);
+				break;
+
+			case "snd":
+				sendAndDelete(toWhomID, args.slice(1).join(" "), message);
+				break;
+
 			default:
 				message.channel.send("That command, miao doesn't understand.")
-				.then(consoleLog(message)).catch(console.error);
+				.then(utils.consoleLog(message)).catch(console.error);
 		}
 		
+	} else if (message.content.startsWith("t")) {
+		console.log("tts command: "+message.content);
+		if (!message.guild) {
+			return;
+		}
+		const args = message.content.slice(1).trim().split(/ +/);
+		const command = args.shift().toLowerCase();
+
+		const options = {
+			args,
+			commands: bot.commands,
+			exclusiveControl:{
+				isExclusive: exclusive,
+				id: bindID
+			}
+		};
+
+		executeCommand(message, options, command);
+	} else if (exclusive && toWhomID===bindID){
+		sendAndDelete(toWhomID, message.content, message);
 	}
 });
 
 bot.login(TOKEN);
 
-//utils
-function consoleLog(msg){
-	console.log(msg.author.username+"@"+msg.guild.name+": "+msg.content);
-}
 
-function sendAndLog(msg, origMsg){
-	origMsg.channel.send(msg).then(consoleLog(origMsg)).catch(console.error);;
-}
+//base functions
 
 const hello = (toWhomID, msg) => {
-	sendAndLog("Miao, ciao, <@"+toWhomID+">, Thomas greets thee!", msg);
+	utils.sendAndLog("Miao, ciao, <@"+toWhomID+">, Thomas greets thee!", msg);
 }
 
 const bless = (toWhomID, msg) => {
-	sendAndLog("Meow, <@"+toWhomID+">, thou shall prevail over thy enemies!", msg)
+	utils.sendAndLog("Meow, <@"+toWhomID+">, thou shall prevail over thy enemies!", msg);
 }
 
 const sendInfo = (msg) => {
-	sendAndLog(
+	utils.sendAndLog(
 		{
 		  embed: {
 			  description: "Thomas the cat communicates with the RNG, meeww!",
@@ -124,98 +166,99 @@ const sendInfo = (msg) => {
 			attachment: './imgs/thomas.jpg',
 			name: 'thomas.jpg'
 		  }]
-		}, msg)
+		}, msg
+	)
 }
 
-const fiveVFive = (msg) => {
-	const voiceChannelID = msg.member.voiceChannelID;
-	if(!voiceChannelID){
-		sendAndLog("Summon your crowd first, then you shall find me!", msg);
-		return ;
+const meow = (msg) => {
+	const { channel } = msg.member.voice;
+	if(!channel){
+		utils.sendAndLog("You have to be in a voice channel!", msg)
+		return;
 	}
-	memberMap = msg.guild.channels.get(voiceChannelID).members;
+
+	channel.join()
+        .then(() => {
+          	console.log(`Joined ${channel.name} in ${msg.guild.name}.`);
+			const { connection } = msg.guild.voice;
+			const source = "./resources/meow.mp3";
+			const dispatcher = connection.play(source);
+			dispatcher.on('start', () => {
+				console.log(source+' is now playing!');
+			});
+			
+			dispatcher.on('finish', () => {
+				console.log(source+' has finished playing!');
+			});
+			
+			// Always remember to handle errors appropriately!
+			dispatcher.on('error', console.error);
+			// console.log(broadcast);
+		}).catch((exception)=>{
+			console.error(exception);
+		});
+}
+
+const switchExclusiveMode = (id, msg) => {
+	// if(bindID!==""){ //binded
+	// 	if(bindID===id){
+	// 		exclusive = !exclusive;
+	// 		exclusive ? bindID=id : bindID="";
+	// 		utils.sendAndLog( exclusive? "Thomas now speaks exclusively for <@"+toWhomID+">!" : "Now Thomas speaks for everyone!",msg);
+	// 	}else{
+	// 		utils.sendAndLog("Thomas speaks for <@"+toWhomID+"> only!", msg);
+	// 	}
+	// }else{ //unbinded
+	// 	bindID = id;
+	// 	exclusive = true;
+	// 	utils.sendAndLog("Thomas now speaks exclusively for <@"+toWhomID+">!", msg);
+	// }
+	if(id!==THOMAS_ID){
+		utils.sendAndLog("<@"+id+"> you can't control me!", msg);
+		return;
+	}
+	if(!exclusive){
+		exclusiveClock = setTimeout(releaseExclusiveControl, EXCLUSIVE_MILLIS, msg);
+		const length = EXCLUSIVE_MILLIS/1000
+		utils.sendAndLog("Thomas now speaks exclusively for <@"+id+"> for "+ length.toString() +" seconds!",msg);
 	
-	sendAndLog("Current players drafted: "+mentionMapOrList(memberMap),msg);
-}
-
-const assignTeam = (msg) => {
-	if(memberMap.size===0){
-		sendAndLog("Drafting first, assigning next!", msg);
-		return ;
-	}
-	teamB = [];
-	teamR = [];
-	const shuffledArr = FisherYeet([...memberMap.keys()]);
-	for(let i in shuffledArr){
-		if(i%2===0){
-			teamB.push(shuffledArr[i]);
-		}else{
-			teamR.push(shuffledArr[i]);
-		}
-	}
-	sendAndLog("Team assignment:\nTeam Blue: "+mentionMapOrList(teamB)+"\nTeam Red: "+mentionMapOrList(teamR), msg);
-}
-
-const moveIntoVC = async(msg) => {
-	if(memberMap.size===0 || teamB.length===0 || teamR.length===0){
-		sendAndLog("Teams have not been assigned yet!", msg);
-		return ;
-	}
-	const promiseB = teamB.map( async id =>{
-		await msg.guild.members.get(id).setVoiceChannel(R6BLEU);
-	});
-	const promiseR = teamR.map( async id =>{
-		await msg.guild.members.get(id).setVoiceChannel(R6ROUGE);
-	})
-	Promise.all([promiseB,promiseR]).then(()=>{
-		inProgress = true;
-		sendAndLog("YEET! GLHF...", msg);
-	});
-}
-
-const gatherUp = async(msg) => {
-	if(!inProgress){
-		sendAndLog("Teams are not divided yet!", msg);
-		return ;
-	}
-	Promise.all(teamR.map( async id =>{
-		await msg.guild.members.get(id).setVoiceChannel(R6BLEU);
-	})).then(()=>{
-		inProgress = false;
-		sendAndLog("GGWP!", msg);
-	});
-}
-
-const clearList = (msg) => {
-	playerList = [];
-	teamR = [];
-	teamB = [];
-	memberMap.clear();
-	sendAndLog("Everything is back to normal!", msg);
-}
-
-const mentionMapOrList = (mapOrList) => {
-	let mentionString = "";
-	if(mapOrList instanceof Map){
-		mapOrList.forEach((value, key)=>{	
-			mentionString += "<@"+key+"> ";
-		})
 	}else{
-		mapOrList.forEach(element=>{
-			mentionString += "<@"+element+"> ";
-		})
+		if(exclusiveClock)
+			clearTimeout(exclusiveClock);
+		exclusiveClock=null;
+		utils.sendAndLog("Now Thomas speaks for everyone!", msg);
 	}
-	return mentionString;
+	exclusive = !exclusive;
 }
 
-const FisherYeet = (origArr) => {
-	const arr = origArr.slice();
-	let i = arr.length, k, temp;
-	while (--i > 0) {
-		k = Math.floor(Math.random() * (i + 1));
-		temp = arr[k];
-		arr[k] = arr[i];
-		arr[i] = temp;
-	}
-	return arr;
+const releaseExclusiveControl = (msg) => {
+	if(!exclusive)
+		return;
+	exclusive = false;
+	utils.sendAndLog("Exclusive control is released, now Thomas speaks for everyone!",msg);
+	exclusiveClock = null;
+}
+
+const sendAndDelete = (id, content, msg) => {
+	utils.sendAndLog("<@"+id+"> just said: "+content, msg);
+	msg.delete();
+}
+
+const executeCommand = (message, options, commandName) => {
+    const author = message.guild ? message.member.displayName : message.author.username;
+    const origin = message.guild ? message.guild.name : `DM with ${author}`;
+
+    const command = bot.commands.get(commandName);
+
+    if (!command) {
+      return;
+    }
+
+    try {
+      console.log(`User ${author} issued command ${commandName} in ${origin}.`);
+      command.execute(message, options);
+    } catch (error) {
+      console.log(error);
+      message.reply("there's been a problem executing your command.");
+    }
 }
