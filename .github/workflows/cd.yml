@@ -29,9 +29,12 @@ jobs:
         env:
           HEROKU_API_KEY: ${{secrets.HEROKU_API_KEY}}
         run: |
+          heroku apps:info --app thomas-die-katze-bot
           heroku container:login
           docker build . -t registry.heroku.com/thomas-die-katze-bot/worker
           docker push registry.heroku.com/thomas-die-katze-bot/worker
           docker pull nginx
           docker tag nginx registry.heroku.com/thomas-die-katze-bot/web
           docker push registry.heroku.com/thomas-die-katze-bot/web
+          heroku container:release worker
+          heroku container:release web
