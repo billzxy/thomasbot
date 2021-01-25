@@ -24,6 +24,9 @@ jobs:
     steps:
       - name: Install Heroku CLI
         run: curl https://cli-assets.heroku.com/install.sh | sh
+      
+      - name: Install fake SSH keys
+        run: ssh-keygen -t rsa -N ''
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
