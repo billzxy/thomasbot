@@ -36,5 +36,5 @@ jobs:
           docker pull nginx
           docker tag nginx registry.heroku.com/thomas-die-katze-bot/web
           docker push registry.heroku.com/thomas-die-katze-bot/web
-          heroku container:release worker
-          heroku container:release web
+          heroku container:release worker --app thomas-die-katze-bot
+          heroku container:release web --app thomas-die-katze-bot
