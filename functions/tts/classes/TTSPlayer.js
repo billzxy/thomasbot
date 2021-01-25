@@ -78,7 +78,7 @@ class TTSPlayer {
     this.speaking = true;
     const { connection } = this.guild.voice;
     const dispatcher = await connection.play(source);
-
+    console.log(source);
     dispatcher.on('speaking', (speaking) => {
       if (!speaking) {
         console.log("not speaking");
