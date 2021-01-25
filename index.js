@@ -9,7 +9,9 @@ const path = require('path');
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const PREFIX = "thomas";
-const TTS_PREFIX = process.env.PREFIX;
+const TTS_PREFIX = process.env.TTS_PREFIX;
+
+console.log(`Using TTS_PREFIX ${TTS_PREFIX}`)
 
 const THOMAS_ID = "229701039144697858";
 let exclusive = false;
@@ -43,6 +45,8 @@ bot.on("message", function(message){
 
 	if(message.author.equals(bot.user))
 		return;
+
+	console.log(`Received message ${message}`);
 
 	if(!message.content.startsWith(PREFIX) && !message.content.startsWith(TTS_PREFIX) && !(exclusive && toWhomID===bindID))
 		return;
@@ -116,8 +120,7 @@ bot.on("message", function(message){
 				message.channel.send("That command, miao doesn't understand.")
 				.then(utils.consoleLog(message)).catch(console.error);
 		}
-		
-	} else if (message.content.startsWith("t")) {
+	} else if (message.content.startsWith(TTS_PREFIX)) {
 		console.log("tts command: "+message.content);
 		if (!message.guild) {
 			return;
