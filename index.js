@@ -1,4 +1,5 @@
 const Discord = require("discord.js");
+const {MessageEmbed} = require("discord.js");
 const TTSPlayer = require('./functions/tts/classes/TTSPlayer');
 require('dotenv').config();
 
@@ -6,14 +7,15 @@ const r6shuffle = require('./functions/r6shuffle');
 const utils = require("./functions/utils");
 const fs = require('fs');
 const path = require('path');
+const { execute } = require("./functions/tts/tts-commands/say");
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const PREFIX = "thomas";
-const TTS_PREFIX = process.env.PREFIX;
+const TTS_PREFIX = "t";
 
 const THOMAS_ID = "229701039144697858";
 let exclusive = false;
-const EXCLUSIVE_MILLIS = 10000;
+const EXCLUSIVE_MILLIS = process.env.EXCLUSIVE_MILLIS;
 let exclusiveClock = null;
 let bindID = THOMAS_ID;
 
@@ -56,16 +58,7 @@ bot.on("message", function(message){
 		let args = message.content.substring(7,).split(" ");
 		switch(args[0]){
 			case "help":
-				message.channel.send('Commands:\n'+
-					"----------------------------\n"+
-					'thomas info\n'+
-					'thomas hello\n'+
-					'thomas bless\n'+
-					'thomas 5v5\\divide\\move\\gather\\reset\n'+
-					'thelp for TTS commands\n'+
-					"----------------------------\n"+
-					"Miao is still learning moar!").then(utils.consoleLog(message))
-				.catch(console.error);
+				sendHelp(message);
 				break;
 
 			case "hello":
@@ -117,12 +110,12 @@ bot.on("message", function(message){
 				.then(utils.consoleLog(message)).catch(console.error);
 		}
 		
-	} else if (message.content.startsWith("t")) {
+	} else if (message.content.startsWith(TTS_PREFIX)) {
 		console.log("tts command: "+message.content);
 		if (!message.guild) {
 			return;
 		}
-		const args = message.content.slice(1).trim().split(/ +/);
+		const args = message.content.slice(TTS_PREFIX.length).trim().split(/ +/);
 		const command = args.shift().toLowerCase();
 
 		const options = {
@@ -136,7 +129,16 @@ bot.on("message", function(message){
 
 		executeCommand(message, options, command);
 	} else if (exclusive && toWhomID===bindID){
-		sendAndDelete(toWhomID, message.content, message);
+		const args = message.content.trim().split(/ +/);
+		const options = {
+			args,
+			commands: bot.commands,
+			exclusiveControl:{
+				isExclusive: exclusive,
+				id: bindID
+			}
+		};
+		executeCommand(message, options, "say");
 	}
 });
 
@@ -151,6 +153,32 @@ const hello = (toWhomID, msg) => {
 
 const bless = (toWhomID, msg) => {
 	utils.sendAndLog("Meow, <@"+toWhomID+">, thou shall prevail over thy enemies!", msg);
+}
+
+const sendHelp= (msg) => {
+	const THOMAS_GH = "https://github.com/billzxy/thomasbot";
+	const TTS_GH = "https://github.com/moonstar-x/discord-tts-bot";
+	const embed = new MessageEmbed()
+	.setTitle('THOMAS Commands:')
+	.addField("THOMAS native commands:",
+	  `
+	  	thomas info
+	  	thomas hello
+	  	thomas bless
+		thomas 5v5\\divide\\move\\gather\\reset
+		thomas exclusive - gain exclusive control over TTS
+		thomas snd - send and delete original message
+
+		[**THOMAS**](${THOMAS_GH}) is constantly learning!!!
+	  `
+	).addField("TTS Commands",
+	`
+		thelp to show commands for Text-to-speech
+
+		TTS is powered by [**discord-tts-bot**](${TTS_GH})
+	`
+	);
+	utils.sendAndLog(embed, msg);
 }
 
 const sendInfo = (msg) => {
@@ -200,19 +228,6 @@ const meow = (msg) => {
 }
 
 const switchExclusiveMode = (id, msg) => {
-	// if(bindID!==""){ //binded
-	// 	if(bindID===id){
-	// 		exclusive = !exclusive;
-	// 		exclusive ? bindID=id : bindID="";
-	// 		utils.sendAndLog( exclusive? "Thomas now speaks exclusively for <@"+toWhomID+">!" : "Now Thomas speaks for everyone!",msg);
-	// 	}else{
-	// 		utils.sendAndLog("Thomas speaks for <@"+toWhomID+"> only!", msg);
-	// 	}
-	// }else{ //unbinded
-	// 	bindID = id;
-	// 	exclusive = true;
-	// 	utils.sendAndLog("Thomas now speaks exclusively for <@"+toWhomID+">!", msg);
-	// }
 	if(id!==THOMAS_ID){
 		utils.sendAndLog("<@"+id+"> you can't control me!", msg);
 		return;

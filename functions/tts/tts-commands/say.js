@@ -9,7 +9,7 @@ module.exports = {
     const { ttsPlayer, name: guildName, voice } = message.guild;
     const connection = voice ? voice.connection : null;
     const [atLeastOneWord] = options.args;
-    const {isExclusive,  id} = options.exclusiveControl;
+    const {isExclusive, id} = options.exclusiveControl;
 
     if(isExclusive && message.author.id!==id){
       message.reply("Only <@"+id+"> can make me speak!");
