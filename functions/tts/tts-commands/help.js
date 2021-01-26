@@ -1,13 +1,13 @@
 const { MessageEmbed } = require('discord.js');
 const { MESSAGE_EMBED } = require('../constants');
-const prefix = process.env.PREFIX;
+const prefix = "t";
 module.exports = {
   name: 'help',
   description: 'Display a help message with all the available commands.',
   emoji: ':question:',
   execute(message, options) {
     const { commands } = options;
-    const orderedCommands = ['say', 'stop', 'lang', 'langs', 'speed', 'help'];
+    const orderedCommands = ['say', 'repeat', 'stop', 'lang', 'langs', 'speed', 'hide', 'help'];
 
     const helpMessage = orderedCommands.reduce((commandsList, commandName) => {
       const command = commands.get(commandName);

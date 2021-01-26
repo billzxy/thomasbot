@@ -1,6 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const { MESSAGE_EMBED } = require('./constants');
-const prefix = process.env.PREFIX;
+const prefix = "t";
 
 const embed = new MessageEmbed()
   .setTitle('List of supported languages:')

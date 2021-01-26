@@ -7,11 +7,11 @@ module.exports = {
   execute(message, options) {
     const { channel } = message.member.voice;
     const { ttsPlayer, name: guildName, voice } = message.guild;
+    const {isExclusive, bindId, autoDelete, setLastMsg} = ttsPlayer.config;
     const connection = voice ? voice.connection : null;
     const [atLeastOneWord] = options.args;
-    const {isExclusive, id} = options.exclusiveControl;
 
-    if(isExclusive && message.author.id!==id){
+    if(isExclusive && message.author.id!==bindId){
       message.reply("Only <@"+id+"> can make me speak!");
       return;
     }
@@ -33,12 +33,28 @@ module.exports = {
 
     if (connection) {
       ttsPlayer.say(options.args.join(' '));
+      setLastMsg(options.args);
+      try{
+        if(autoDelete)
+          message.delete();
+      }catch(error){
+        message.channel.send(`Unable to delete message, probably due to no permission.`);
+        console.error(error);
+      }
     } else {
       channel.join()
         .then(() => {
           console.log(`Joined ${channel.name} in ${guildName}.`);
           message.channel.send(`Joined ${channel}.`);
           ttsPlayer.say(options.args.join(' '));
+          setLastMsg(options.args);
+          try{
+            if(autoDelete)
+              message.delete();
+          }catch(error){
+            message.channel.send(`Unable to delete message, probably due to no permission.`);
+            console.error(error);
+          }
         })
         .catch((error) => {
           console.error(error);

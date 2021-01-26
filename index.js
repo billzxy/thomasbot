@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const {MessageEmbed} = require("discord.js");
 const TTSPlayer = require('./functions/tts/classes/TTSPlayer');
+const TTS_CONF = require('./functions/tts/classes/TTSConfig');
 require('dotenv').config();
 
 const r6shuffle = require('./functions/r6shuffle');
@@ -14,10 +15,7 @@ const PREFIX = "thomas";
 const TTS_PREFIX = "t";
 
 const THOMAS_ID = "229701039144697858";
-let exclusive = false;
 const EXCLUSIVE_MILLIS = process.env.EXCLUSIVE_MILLIS;
-let exclusiveClock = null;
-let bindID = THOMAS_ID;
 
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
@@ -32,7 +30,7 @@ commandFiles.forEach((file) => {
 bot.on("ready",function(){
 	console.log("Thomas is ready for commands!");
 	bot.guilds.cache.each((guild) => {
-		guild.ttsPlayer = new TTSPlayer(guild);
+		guild.ttsPlayer = new TTSPlayer(guild, new TTS_CONF());
 	});
 	bot.user.setActivity("cmds: thomas help/info",{type:"LISTENING"});
 });
@@ -42,13 +40,12 @@ bot.on("error", (error) =>console.log(error));
 //main loop
 bot.on("message", function(message){
 	let toWhomID = message.author.id;
+	const { isExclusive, bindId} = message.guild.ttsPlayer.config;
 
 	if(message.author.equals(bot.user))
 		return;
 
-	console.log(`Received message ${message}`);
-
-	if(!message.content.startsWith(PREFIX) && !message.content.startsWith(TTS_PREFIX) && !(exclusive && toWhomID===bindID))
+	if(!message.content.startsWith(PREFIX) && !message.content.startsWith(TTS_PREFIX) && !(isExclusive && toWhomID===bindId))
 		return;
 
 	if(message.content === PREFIX){
@@ -103,6 +100,10 @@ bot.on("message", function(message){
 				switchExclusiveMode(toWhomID, message);
 				break;
 
+			case "release":
+				releaseExclusiveControl(message);
+				break;
+
 			case "snd":
 				sendAndDelete(toWhomID, args.slice(1).join(" "), message);
 				break;
@@ -122,25 +123,16 @@ bot.on("message", function(message){
 		const options = {
 			args,
 			commands: bot.commands,
-			exclusiveControl:{
-				isExclusive: exclusive,
-				id: bindID
-			}
 		};
 
 		executeCommand(message, options, command);
-	} else if (exclusive && toWhomID===bindID){
+	} else if (isExclusive && toWhomID===bindId){
 		const args = message.content.trim().split(/ +/);
 		const options = {
 			args,
 			commands: bot.commands,
-			exclusiveControl:{
-				isExclusive: exclusive,
-				id: bindID
-			}
 		};
 		executeCommand(message, options, "say");
-		message.delete();
 	}
 });
 
@@ -169,6 +161,7 @@ const sendHelp= (msg) => {
 	  	thomas bless
 		thomas 5v5\\divide\\move\\gather\\reset
 		thomas exclusive - gain exclusive control over TTS
+		thomas release - release exclusive control
 		thomas snd - send and delete original message
 
 		[**THOMAS**](${THOMAS_GH}) is constantly learning!!!
@@ -211,7 +204,8 @@ const meow = (msg) => {
         .then(() => {
           	console.log(`Joined ${channel.name} in ${msg.guild.name}.`);
 			const { connection } = msg.guild.voice;
-			const source = "./resources/meow.mp3";
+			const index = Math.floor(Math.random() * Math.floor(2));
+			const source = `./resources/meow${index}.mp3`;
 			const dispatcher = connection.play(source);
 			dispatcher.on('start', () => {
 				console.log(source+' is now playing!');
@@ -230,30 +224,37 @@ const meow = (msg) => {
 }
 
 const switchExclusiveMode = (id, msg) => {
-	if(id!==THOMAS_ID){
+	const {isExclusive, bindId, exclusiveClock,
+		setExclusive, setBindId, setExclusiveClock} = msg.guild.ttsPlayer.config;
+
+	if(bindId && id!==bindId){
 		utils.sendAndLog("<@"+id+"> you can't control me!", msg);
 		return;
 	}
-	if(!exclusive){
-		exclusiveClock = setTimeout(releaseExclusiveControl, EXCLUSIVE_MILLIS, msg);
+	if(!isExclusive){
+		setExclusive(setTimeout(releaseExclusiveControl, EXCLUSIVE_MILLIS, msg));
+		setBindId(id);
 		const length = EXCLUSIVE_MILLIS/1000
 		utils.sendAndLog("Thomas now speaks exclusively for <@"+id+"> for "+ length.toString() +" seconds!",msg);
 	
 	}else{
 		if(exclusiveClock)
-			clearTimeout(exclusiveClock);
-		exclusiveClock=null;
+			clearTimeout(msg.guild.ttsPlayer.config.exclusiveClock);
+		setExclusiveClock(null);
+		setBindId(null);
 		utils.sendAndLog("Now Thomas speaks for everyone!", msg);
 	}
-	exclusive = !exclusive;
+	setExclusive(!isExclusive);
 }
 
 const releaseExclusiveControl = (msg) => {
-	if(!exclusive)
+	const {isExclusive, setExclusive, setExclusiveClock, setBindId} = msg.guild.ttsPlayer.config;
+	if(!isExclusive)
 		return;
-	exclusive = false;
+	setExclusive(false);
+	setBindId(null);
 	utils.sendAndLog("Exclusive control is released, now Thomas speaks for everyone!",msg);
-	exclusiveClock = null;
+	setExclusiveClock(null);
 }
 
 const sendAndDelete = (id, content, msg) => {

@@ -6,13 +6,13 @@ const { TTS_ENGINES, AEIOU_API_URL } = require('../constants');
 const prefix = process.env.PREFIX;
 
 class TTSPlayer {
-  constructor(guild) {
+  constructor(guild, config) {
     this.guild = guild;
-
     this.queue = [];
     this.speaking = false;
     this.lang = 'cmn';
     this.slow = false;
+    this.config = config;
   }
 
   say(phrase) {
@@ -52,7 +52,6 @@ class TTSPlayer {
 
   playTTS() {
     const [firstInQueue] = this.queue;
-    console.log(this.queue);
     if (!firstInQueue) {
       return;
     }
@@ -78,10 +77,8 @@ class TTSPlayer {
     this.speaking = true;
     const { connection } = this.guild.voice;
     const dispatcher = await connection.play(source);
-    console.log(source);
     dispatcher.on('speaking', (speaking) => {
       if (!speaking) {
-        console.log("not speaking");
         this.queue.shift();
         this.speaking = false;
         this.playTTS();

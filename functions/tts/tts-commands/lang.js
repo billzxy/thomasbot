@@ -1,4 +1,4 @@
-const prefix = process.env.PREFIX;
+const prefix = "t";
 const languages = require('../languages.json');
 
 module.exports = {
