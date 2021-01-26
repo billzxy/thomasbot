@@ -46,6 +46,8 @@ bot.on("message", function(message){
 	if(message.author.equals(bot.user))
 		return;
 
+	console.log(`Received message ${message}`);
+
 	if(!message.content.startsWith(PREFIX) && !message.content.startsWith(TTS_PREFIX) && !(exclusive && toWhomID===bindID))
 		return;
 
@@ -109,7 +111,6 @@ bot.on("message", function(message){
 				message.channel.send("That command, miao doesn't understand.")
 				.then(utils.consoleLog(message)).catch(console.error);
 		}
-		
 	} else if (message.content.startsWith(TTS_PREFIX)) {
 		console.log("tts command: "+message.content);
 		if (!message.guild) {
