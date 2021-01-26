@@ -140,6 +140,7 @@ bot.on("message", function(message){
 			}
 		};
 		executeCommand(message, options, "say");
+		message.delete();
 	}
 });
 
