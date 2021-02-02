@@ -1,9 +1,6 @@
 const utils = require('../index');
-const R6ROUGE = "435634221277773844";
-const R6BLEU = '438091004566962177';
-
-const VCTEST1 = "449019484766732291";
-const VCTEST2 = "697523734474391573";
+const R6ROUGE = process.env.R6ROUGE;
+const R6BLEU = process.env.R6BLEU;
 
 let playerList = [];
 let memberMap = new Map();

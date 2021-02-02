@@ -12,7 +12,7 @@ module.exports = {
     const [atLeastOneWord] = options.args;
 
     if(isExclusive && message.author.id!==bindId){
-      message.reply("Only <@"+id+"> can make me speak!");
+      message.reply("Only <@"+bindId+"> can make me speak!");
       return;
     }
 

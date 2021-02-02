@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const r6shuffle = require('./functions/r6shuffle');
 const utils = require("./functions/utils");
+const reserve = require("./functions/reservation");
 const fs = require('fs');
 const path = require('path');
 const { execute } = require("./functions/tts/tts-commands/say");
@@ -104,6 +105,10 @@ bot.on("message", function(message){
 				releaseExclusiveControl(message);
 				break;
 
+			case "reserve":
+				reservationDriver(message);
+				break;
+
 			case "snd":
 				sendAndDelete(toWhomID, args.slice(1).join(" "), message);
 				break;
@@ -162,6 +167,7 @@ const sendHelp= (msg) => {
 		thomas 5v5\\divide\\move\\gather\\reset
 		thomas exclusive - gain exclusive control over TTS
 		thomas release - release exclusive control
+		thomas reserve (-h) - see detailed usage
 		thomas snd - send and delete original message
 
 		[**THOMAS**](${THOMAS_GH}) is constantly learning!!!
@@ -255,6 +261,15 @@ const releaseExclusiveControl = (msg) => {
 	setBindId(null);
 	utils.sendAndLog("Exclusive control is released, now Thomas speaks for everyone!",msg);
 	setExclusiveClock(null);
+}
+
+const reservationDriver = (msg) => {
+	reserve(msg.content.split(" "), output => {
+		const message = output ? output : "There's a problem with your command, try adding -h";
+		const embed = new MessageEmbed()
+		.addField("THOMAS Reservation Menu:",message);
+		utils.sendAndLog(embed, msg);
+	});
 }
 
 const sendAndDelete = (id, content, msg) => {
