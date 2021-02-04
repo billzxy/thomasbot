@@ -15,8 +15,8 @@ const TOKEN = process.env.DISCORD_TOKEN;
 const PREFIX = "thomas";
 const TTS_PREFIX = "t";
 
-const THOMAS_ID = "229701039144697858";
 const EXCLUSIVE_MILLIS = process.env.EXCLUSIVE_MILLIS;
+const MODE = process.env.MODE;
 
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
@@ -33,7 +33,17 @@ bot.on("ready",function(){
 	bot.guilds.cache.each((guild) => {
 		guild.ttsPlayer = new TTSPlayer(guild, new TTS_CONF());
 	});
-	bot.user.setActivity("cmds: thomas help/info",{type:"LISTENING"});
+	if(MODE && MODE==="dev"){
+		bot.user.setPresence({
+			status: 'dnd',
+			activity: {
+				name: "Under maintenance!",
+				type: "COMPETING",
+			}
+		});
+	}
+	else
+		bot.user.setActivity("cmds: thomas help/info",{type:"LISTENING"});
 });
 
 bot.on("error", (error) =>console.log(error));
@@ -264,12 +274,7 @@ const releaseExclusiveControl = (msg) => {
 }
 
 const reservationDriver = (msg) => {
-	reserve(msg.content.split(" "), output => {
-		const message = output ? output : "There's a problem with your command, try adding -h";
-		const embed = new MessageEmbed()
-		.addField("THOMAS Reservation Menu:",message);
-		utils.sendAndLog(embed, msg);
-	});
+	reserve(msg.content.split(" "), msg);
 }
 
 const sendAndDelete = (id, content, msg) => {

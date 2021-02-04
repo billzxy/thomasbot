@@ -1,5 +1,3 @@
-
-
 class TTS_CONF {
     constructor() {
         this._lastMessage = [];
