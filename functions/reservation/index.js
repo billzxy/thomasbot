@@ -1,11 +1,13 @@
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers');
 const { argv } = require('yargs');
-const {MessageEmbed} = require("discord.js");
+const {MessageEmbed, Collector} = require("discord.js");
 const utils = require("../utils");
 const Emote = require("./emotes");
 
 let resList = [];
+
+const COLLECTOR_INTERRUPT = "interrupt";
 
 const executeCommand = (args, origMsg) => {
     const parser = yargs()
@@ -18,10 +20,16 @@ const executeCommand = (args, origMsg) => {
             builder: (yargs) => {
                 return yargs.option('time', {
                     alias: 't',
+                    demandOption: true,
                     describe: " - Set the desired start time"
                 }).option('game', {
                     alias: 'g',
+                    demandOption: true,
                     describe: " - The game you wish to play"
+                }).option('expire',{
+                    alias: 'e',
+                    describe: " - For how long is reaction-polling available (in minutes),"+
+                        " 10 mins default"
                 });
             },
             handler: argv => handleMake(argv, origMsg),
@@ -79,28 +87,34 @@ const executeCommand = (args, origMsg) => {
 
 const handleMake = (argv, origMsg) => {
     const senderId = origMsg.author.id;
-    const game = argv.game, time = argv.time;
-
+    const game = argv.game, time = argv.time, expire = argv.expire;
     const reservation = {
         id: resList.length+1,
         game: argv.game,
         time: argv.time,
+        collector: null,
         players: []
     }
-    resList.push(reservation);
+
     const embed = new MessageEmbed().addField(
-        "New Gaming Reservation Invitation!", 
-        ` <@${senderId}> would like to invite y'all to play ${game} at ${time} UTC!!\n`
-        +`*This poll will be available for 1 min*\n`
-        +`*if reaction is unavailable, try* thomas reserve ls, thomas reserve join [reservation index]`
-        );
+        ":video_game: New Gaming Invitation!", 
+        ` <@${senderId}> would like to invite y'all to play ${game} at ${time}!!\n\n`
+        +`*This poll will be available for ${expire?expire:10} min*\n`
+    ).addField(
+        ":accept: To join this reservation, reply:",
+        ` thomas reserve join ${reservation.id} \n\n`+
+        `↓ ↓ Click the reactions below `
+    );
     sendEmbedMessageWithBinaryChoices(
         embed,
         origMsg,
-        () => handleJoin({index: reservation.id}, origMsg),
-        () => handleLeave({index: reservation.id}, origMsg),
-        () => sendMessage(showPlayersInRes(reservation.id), origMsg)
-    );
+        (collector, reactorId) => handleJoin({index: reservation.id}, reactorId, origMsg),
+        (collector, reactorId) => handleLeave({index: reservation.id}, reactorId, origMsg),
+        () => sendMessage(showPlayersInRes(reservation.id), origMsg),
+        expire*60000
+    ).then(collector => reservation.collector = collector );
+    
+    resList.push(reservation);
 }
 
 const handleList = (argv, origMsg) => {
@@ -112,9 +126,22 @@ const handleShow = (argv, origMsg) => {
     let message;
     if(index)
         message = showPlayersInRes(index);
-    else
+    else{
         message = "Missing argument! You had ONE JOB, that was to specify an index!!";
-    sendMessage(message, origMsg);
+        sendMessage(message, origMsg);
+        return;
+    }
+    
+    const embed = new MessageEmbed().addField(`Gaming Reservation`, message+"\n`↓ ↓ Click to JOIN!`");
+    
+    sendEmbedMessageWithBinaryChoices(
+        embed,
+        origMsg,
+        (collector, reactorId) => handleJoin({index: index}, reactorId, origMsg),
+        (collector, reactorId) => handleLeave({index: index}, reactorId, origMsg),
+        () => {},
+        60000
+    );
 }
 
 const handleEdit = (argv, origMsg) => {
@@ -130,7 +157,7 @@ const handleRemove = (argv, origMsg) => {
     }
     const embed = new MessageEmbed().addField(
         "Warning!", 
-        ` <@${origMsg.author.id}> you're about to remove reservation for ${res.game} at ${res.time} UTC!!\n`
+        ` <@${origMsg.author.id}> you're about to remove reservation for ${res.game} at ${res.time}!!\n`
         +`**ARE YOU SURE??**\n`);
 
     
@@ -139,14 +166,18 @@ const handleRemove = (argv, origMsg) => {
         origMsg,
         () => { 
             const result = removeReservation(index);
-            if(result)
+            if(result){
                 origMsg.channel.send(`Reservation ${res.game} at ${res.time} removed`);
+                collector.stop(COLLECTOR_INTERRUPT);
+            }
             else
                 origMsg.channel.send(`Unable to remove!`);
         },
-        () => origMsg.channel.send(`Lemme know when you change your mind, later homie...`),
-        () => {},
-        // () => origMsg.channel.send(`Hello??? Jebait me once more, and you get banned :) `),
+        () => {
+            origMsg.channel.send(`Lemme know when you change your mind, later homie...`);
+            collector.stop(COLLECTOR_INTERRUPT);
+        },
+        () => origMsg.channel.send(`Hello??? Jebait me once more, and you get banned :) `),
         10000
     );
 }
@@ -155,14 +186,13 @@ const handleClear = (argv, origMsg) => {
     sendMessage("Function WIP, come back l8r..", origMsg);
 } 
 
-const handleJoin = (argv, origMsg) => {
-    const userId = origMsg.author.id;
+const handleJoin = (argv, userId, origMsg) => {
     const resIndex = argv.index!==0?argv.index-1:0;
     console.log(resIndex);
     try{
         const joinRes = joinReservation(resIndex, userId);
         if(joinRes)  
-            origMsg.channel.send(`Yay! <@${userId}> is now onboard for ${resList[resIndex].game} at ${resList[resIndex].time} UTC!!`);
+            origMsg.channel.send(`Yay! <@${userId}> is now onboard for ${resList[resIndex].game} at ${resList[resIndex].time}!!`);
         else
             origMsg.channel.send(`<@${userId}> has already joined!`);
     }catch(error){
@@ -171,8 +201,7 @@ const handleJoin = (argv, origMsg) => {
     }
 }
 
-const handleLeave = (argv, origMsg) => {
-    const userId = origMsg.author.id;
+const handleLeave = (argv, userId, origMsg) => {
     const resIndex = argv.index!==0?argv.index-1:0;
     try{
         const desertRes = desertReservation(resIndex, userId);
@@ -185,8 +214,9 @@ const handleLeave = (argv, origMsg) => {
     }
 }
 
-const sendEmbedMessageWithBinaryChoices = (embed, origMsg, doYea, doNay, onEnd, expire=60000) => {
-    origMsg.channel.send(embed).then( message => {
+const sendEmbedMessageWithBinaryChoices = (embed, origMsg, doYea, doNay, onEnd, expire=600000) => {
+    let collector = null;
+    return origMsg.channel.send(embed).then( message => {
         message.react(Emote.getEmoteStr('yea'))
             .then(()=>message.react(Emote.getEmoteStr('nay')))
             .catch(error=>console.log("Some emojis failed to react:", error));
@@ -194,15 +224,16 @@ const sendEmbedMessageWithBinaryChoices = (embed, origMsg, doYea, doNay, onEnd, 
         const reactionFilter = (reaction, user) => {
             return user.id !== message.author.id && Emote.includes(reaction.emoji.id);
         };
-        const collector = message.createReactionCollector(reactionFilter, { time: expire });
+        collector = message.createReactionCollector(reactionFilter, { time: expire });
         collector.on('collect', (reaction, user) => {
             console.log(`${user.username} reacted with ${reaction.emoji.identifier}`);
             if(Emote.equalsEmoteId("yea", reaction.emoji.id))
-                doYea();
+                doYea(collector, user.id);
             else
-                doNay();
+                doNay(collector, user.id);
         });
-        collector.on('end', collected => onEnd());
+        collector.on('end', (collected, reason) => reason!==COLLECTOR_INTERRUPT && onEnd(collected, reason));
+        return collector;
     });
 }
 
@@ -239,6 +270,7 @@ const desertReservation = (index, userId) => {
 
 const removeReservation = (index) => {
     if(index>-1){
+        resList[index-1].collector && resList[index-1].collector.stop(COLLECTOR_INTERRUPT);
         resList.splice(index-1, 1);
         return true;
     }else{

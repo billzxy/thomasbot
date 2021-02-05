@@ -80,7 +80,9 @@ bot.on("message", function(message){
 				break;
 
 			case "meow":
-				meow(message);
+				const index = Math.floor(Math.random() * Math.floor(2));
+				const source = `./resources/meow${index}.mp3`;
+				playMP3(message, source);
 				break;
 			
 			case "5v5":
@@ -132,6 +134,11 @@ bot.on("message", function(message){
 		if (!message.guild) {
 			return;
 		}
+		if(MODE&&MODE==="dev"){
+			playMP3(message,"./resources/undermaintenance.mp3");
+			return;
+		}
+		
 		const args = message.content.slice(TTS_PREFIX.length).trim().split(/ +/);
 		const command = args.shift().toLowerCase();
 
@@ -209,7 +216,7 @@ const sendInfo = (msg) => {
 	)
 }
 
-const meow = (msg) => {
+const playMP3 = (msg, source) => {
 	const { channel } = msg.member.voice;
 	if(!channel){
 		utils.sendAndLog("You have to be in a voice channel!", msg)
@@ -220,8 +227,6 @@ const meow = (msg) => {
         .then(() => {
           	console.log(`Joined ${channel.name} in ${msg.guild.name}.`);
 			const { connection } = msg.guild.voice;
-			const index = Math.floor(Math.random() * Math.floor(2));
-			const source = `./resources/meow${index}.mp3`;
 			const dispatcher = connection.play(source);
 			dispatcher.on('start', () => {
 				console.log(source+' is now playing!');

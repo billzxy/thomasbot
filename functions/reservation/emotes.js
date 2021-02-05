@@ -12,6 +12,20 @@ class Emote{
         }
     };
 
+    static number = [
+        ":zero:",
+        ":one:",
+        ":two:",
+        ":three:",
+        ":four:",
+        ":five:",
+        ":six:",
+        ":seven:",
+        ":eight:",
+        ":nine:",
+        ":ten:"
+    ]
+
     static getEmoteStr = (name) =>{
         return `<:${this.emoteList[name].name}:${this.emoteList[name].id}>`;
     }
