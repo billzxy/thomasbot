@@ -124,6 +124,16 @@ bot.on("message", function(message){
 			case "snd":
 				sendAndDelete(toWhomID, args.slice(1).join(" "), message);
 				break;
+			
+			case "why":
+				const whyIndex = Math.floor(Math.random() * Math.floor(4));
+				const whysource = `./resources/why0.mp3`;
+				playMP3(message, whysource);
+				break;
+
+			case "gey":
+				playMP3(message, `./resources/why1.mp3`);
+				break;
 
 			default:
 				message.channel.send("That command, miao doesn't understand.")
