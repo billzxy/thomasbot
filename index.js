@@ -135,6 +135,10 @@ bot.on("message", function(message){
 				playMP3(message, `./resources/why1.mp3`);
 				break;
 
+			case "suka":
+				playMP3(message, './resources/suka.mp3');
+				break;
+
 			default:
 				message.channel.send("That command, miao doesn't understand.")
 				.then(utils.consoleLog(message)).catch(console.error);
