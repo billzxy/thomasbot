@@ -231,10 +231,10 @@ const sendInfo = (msg) => {
 }
 
 const tarkovTrolling = (msg) => {
-	const audioPath = path.join(__dirname, 'resources/tarkov');
-	const audioFiles = fs.readdirSync(audioPath);
-	const randomFile = audioFiles[Math.floor(Math.random() * Math.floor(audioFiles.length))]
-	playMP3(msg, randomFile);
+	// const audioPath = path.join(__dirname, 'resources/tarkov');
+	// const audioFiles = fs.readdirSync(audioPath);
+	const randomIndex = Math.floor(Math.random() * Math.floor(3));
+	playMP3(msg, `./resources/tarkov/tarkov${randomIndex}.mp3`);
 }
 
 const playMP3 = (msg, source) => {
