@@ -135,8 +135,8 @@ bot.on("message", function(message){
 				playMP3(message, `./resources/why1.mp3`);
 				break;
 
-			case "suka":
-				playMP3(message, './resources/suka.mp3');
+			case "tarkov":
+				tarkovTrolling(message);
 				break;
 
 			default:
@@ -228,6 +228,13 @@ const sendInfo = (msg) => {
 		  }]
 		}, msg
 	)
+}
+
+const tarkovTrolling = (msg) => {
+	const audioPath = path.join(__dirname, 'resources/tarkov');
+	const audioFiles = fs.readdirSync(audioPath);
+	const randomFile = audioFiles[Math.floor(Math.random() * Math.floor(audioFiles.length))]
+	playMP3(msg, randomFile);
 }
 
 const playMP3 = (msg, source) => {
