@@ -1,4 +1,4 @@
-const utils = require('../index');
+const utils = require('./utils');
 const R6ROUGE = process.env.R6ROUGE;
 const R6BLEU = process.env.R6BLEU;
 
