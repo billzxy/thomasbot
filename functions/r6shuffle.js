@@ -44,19 +44,20 @@ const assignTeam = (msg) => {
 	utils.sendAndLog("Team assignment:\nTeam Blue: "+mentionMapOrList(teamB)+"\nTeam Red: "+mentionMapOrList(teamR), msg);
 }
 
-const moveIntoVC = async(msg) => {
+const moveIntoVC = (msg) => {
 	if(memberMap.size===0 || teamB.length===0 || teamR.length===0){
 		utils.sendAndLog("Teams have not been assigned yet!", msg);
 		return ;
 	}
-	const promiseB = teamB.map( async id =>{
+	let promiseB, promiseR;
+	teamB.forEach(id =>{
 		msg.guild.members.fetch(id).then(member => {
-			await member.voice.setChannel(R6BLEU);
+			promiseB.push(member.voice.setChannel(R6BLEU));
 		});
 	});
-	const promiseR = teamR.map( async id =>{
+	teamR.forEach(id =>{
 		msg.guild.members.fetch(id).then(member => {
-			await member.voice.setChannel(R6ROUGE);
+			promiseR.push(member.voice.setChannel(R6ROUGE));
 		});
 		// await msg.guild.members.get(id).setVoiceChannel(R6ROUGE);
 	})
@@ -66,17 +67,18 @@ const moveIntoVC = async(msg) => {
 	});
 }
 
-const gatherUp = async(msg) => {
+const gatherUp = (msg) => {
 	if(!inProgress){
 		utils.sendAndLog("Teams are not divided yet!", msg);
 		return ;
 	}
-	Promise.all(teamR.map( async id =>{
+	let promiseAll;
+	teamR.forEach( id => {
 		msg.guild.members.fetch(id).then(member => {
-			await member.voice.setChannel(R6BLEU);
+			promiseAll.push(member.voice.setChannel(R6BLEU));
 		});
-		// await msg.guild.members.get(id).setVoiceChannel(R6BLEU);
-	})).then(()=>{
+	});
+	Promise.all(promiseAll).then(()=>{
 		inProgress = false;
 		utils.sendAndLog("GGWP!", msg);
 	});
