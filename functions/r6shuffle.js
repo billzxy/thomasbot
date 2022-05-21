@@ -9,7 +9,8 @@ let teamB = [];
 let inProgress = false;
 
 const fiveVFive = (msg) => {
-	const voiceChannelID = msg.member.voiceChannelID;
+	console.log(msg);
+	const voiceChannelID = msg.member.voice.channelID;
 	if(!voiceChannelID){
 		utils.sendAndLog("Summon your crowd first, then you shall find me!", msg);
 		return ;
