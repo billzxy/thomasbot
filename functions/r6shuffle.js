@@ -15,7 +15,13 @@ const fiveVFive = (msg) => {
 		utils.sendAndLog("Summon your crowd first, then you shall find me!", msg);
 		return ;
 	}
-	memberMap = msg.guild.channels.get(voiceChannelID).members;
+	let memberMap;
+	msg.guild.channels.fetch(voiceChannelID)
+	.then(channel => {
+		console.log(`The channel name is: ${channel.name}`);
+		memberMap = channel.members;
+	})
+	.catch(console.error);
 	
 	utils.sendAndLog("Current players drafted: "+mentionMapOrList(memberMap),msg);
 }
@@ -44,10 +50,11 @@ const moveIntoVC = async(msg) => {
 		return ;
 	}
 	const promiseB = teamB.map( async id =>{
-		await msg.guild.members.get(id).setVoiceChannel(R6BLEU);
+		msg.guild.members.fetch(id).then(member => await member.voice.setChannel(R6BLEU));
 	});
 	const promiseR = teamR.map( async id =>{
-		await msg.guild.members.get(id).setVoiceChannel(R6ROUGE);
+		msg.guild.members.fetch(id).then(member => await member.voice.setChannel(R6ROUGE));
+		// await msg.guild.members.get(id).setVoiceChannel(R6ROUGE);
 	})
 	Promise.all([promiseB,promiseR]).then(()=>{
 		inProgress = true;
@@ -61,7 +68,8 @@ const gatherUp = async(msg) => {
 		return ;
 	}
 	Promise.all(teamR.map( async id =>{
-		await msg.guild.members.get(id).setVoiceChannel(R6BLEU);
+		msg.guild.members.fetch(id).then(member => await member.voice.setChannel(R6BLEU));
+		// await msg.guild.members.get(id).setVoiceChannel(R6BLEU);
 	})).then(()=>{
 		inProgress = false;
 		utils.sendAndLog("GGWP!", msg);
