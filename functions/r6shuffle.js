@@ -50,10 +50,14 @@ const moveIntoVC = async(msg) => {
 		return ;
 	}
 	const promiseB = teamB.map( async id =>{
-		msg.guild.members.fetch(id).then(member => await member.voice.setChannel(R6BLEU));
+		msg.guild.members.fetch(id).then(member => {
+			await member.voice.setChannel(R6BLEU);
+		});
 	});
 	const promiseR = teamR.map( async id =>{
-		msg.guild.members.fetch(id).then(member => await member.voice.setChannel(R6ROUGE));
+		msg.guild.members.fetch(id).then(member => {
+			await member.voice.setChannel(R6ROUGE);
+		});
 		// await msg.guild.members.get(id).setVoiceChannel(R6ROUGE);
 	})
 	Promise.all([promiseB,promiseR]).then(()=>{
@@ -68,7 +72,9 @@ const gatherUp = async(msg) => {
 		return ;
 	}
 	Promise.all(teamR.map( async id =>{
-		msg.guild.members.fetch(id).then(member => await member.voice.setChannel(R6BLEU));
+		msg.guild.members.fetch(id).then(member => {
+			await member.voice.setChannel(R6BLEU);
+		});
 		// await msg.guild.members.get(id).setVoiceChannel(R6BLEU);
 	})).then(()=>{
 		inProgress = false;
