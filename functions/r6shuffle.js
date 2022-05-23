@@ -15,7 +15,7 @@ const fiveVFive = (msg) => {
 		utils.sendAndLog("Summon your crowd first, then you shall find me!", msg);
 		return ;
 	}
-	const memberMap = msg.guild.channels.resolve(voiceChannelID).members;
+	memberMap = msg.guild.channels.resolve(voiceChannelID).members;
 	// msg.guild.channels.fetch(voiceChannelID)
 	// .then(channel => {
 	// 	console.log(`The channel name is: ${channel.name}`);
