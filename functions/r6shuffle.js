@@ -9,19 +9,19 @@ let teamB = [];
 let inProgress = false;
 
 const fiveVFive = (msg) => {
-	console.log(msg);
+	// const voiceChannelID = msg.member.voice.channelID; newer API 
 	const voiceChannelID = msg.member.voice.channelID;
 	if(!voiceChannelID){
 		utils.sendAndLog("Summon your crowd first, then you shall find me!", msg);
 		return ;
 	}
-	let memberMap;
-	msg.guild.channels.fetch(voiceChannelID)
-	.then(channel => {
-		console.log(`The channel name is: ${channel.name}`);
-		memberMap = channel.members;
-	})
-	.catch(console.error);
+	const memberMap = msg.guild.channels.resolve(voiceChannelID).members;
+	// msg.guild.channels.fetch(voiceChannelID)
+	// .then(channel => {
+	// 	console.log(`The channel name is: ${channel.name}`);
+	// 	memberMap = channel.members;
+	// })
+	// .catch(console.error);
 	
 	utils.sendAndLog("Current players drafted: "+mentionMapOrList(memberMap),msg);
 }
