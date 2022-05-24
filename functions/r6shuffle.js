@@ -72,7 +72,7 @@ const gatherUp = (msg) => {
 		utils.sendAndLog("Teams are not divided yet!", msg);
 		return ;
 	}
-	let promiseAll;
+	let promiseAll = [];
 	teamR.forEach( id => {
 		msg.guild.members.fetch(id).then(member => {
 			promiseAll.push(member.voice.setChannel(R6BLEU));
