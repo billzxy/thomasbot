@@ -49,7 +49,7 @@ const moveIntoVC = (msg) => {
 		utils.sendAndLog("Teams have not been assigned yet!", msg);
 		return ;
 	}
-	let promiseB, promiseR;
+	let promiseB = [], promiseR = [];
 	teamB.forEach(id =>{
 		msg.guild.members.fetch(id).then(member => {
 			promiseB.push(member.voice.setChannel(R6BLEU));
