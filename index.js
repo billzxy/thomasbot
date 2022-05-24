@@ -199,7 +199,7 @@ const sendHelp= (msg) => {
 	  	thomas info
 	  	thomas hello
 	  	thomas bless
-		thomas 5v5\\divide\\move\\gather\\reset
+		thomas 5v5\\divide\\exclude\\move\\gather\\reset
 		thomas exclusive - gain exclusive control over TTS
 		thomas release - release exclusive control
 		thomas reserve (-h) - see detailed usage

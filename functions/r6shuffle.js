@@ -33,6 +33,8 @@ const excludePlayer = (msg) => {
 		return ;
 	}
 	const mentionedMemberMap = msg.mentions.members;
+	console.log(mentionedMemberMap);
+	console.log(memberMap);
 	if(!mentionedMemberMap || mentionedMemberMap.size===0){
 		utils.sendAndLog("You have to mention @whoeverYouWantToExclude!", msg);
 		return ;
