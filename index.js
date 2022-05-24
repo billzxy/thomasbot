@@ -89,6 +89,10 @@ bot.on("message", function(message){
 				r6shuffle.fiveVFive(message);
 				break;
 
+			case "exclude":
+				r6shuffle.fiveVFive(message);
+				break;
+
 			case "divide":
 				r6shuffle.assignTeam(message);
 				break;

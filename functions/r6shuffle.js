@@ -1,6 +1,7 @@
 const utils = require('./utils');
 const R6ROUGE = process.env.R6ROUGE;
 const R6BLEU = process.env.R6BLEU;
+const R6CARRYROLENAME = process.env.R6CARRYROLENAME;
 
 let playerList = [];
 let memberMap = new Map();
@@ -26,6 +27,26 @@ const fiveVFive = (msg) => {
 	utils.sendAndLog("Current players drafted: "+mentionMapOrList(memberMap),msg);
 }
 
+const excludePlayer = (msg) => {
+	if(memberMap.size===0){
+		utils.sendAndLog("Players are not drafted yet!", msg);
+		return ;
+	}
+	const mentionedMemberMap = msg.mentions.members;
+	if(!mentionedMemberMap || mentionedMemberMap.size===0){
+		utils.sendAndLog("You have to mention @whoeverYouWantToExclude!", msg);
+		return ;
+	}
+	mentionedMemberMap.forEach((member, id) => {
+		memberMap.delete(id);
+	});
+	if(memberMap.size===0){
+		utils.sendAndLog("Player pool is purged, and no one's playing anymore!", msg);
+	}else{
+		utils.sendAndLog("Current players drafted: "+mentionMapOrList(memberMap), msg);
+	}
+}
+
 const assignTeam = (msg) => {
 	if(memberMap.size===0){
 		utils.sendAndLog("Drafting first, assigning next!", msg);
@@ -33,7 +54,21 @@ const assignTeam = (msg) => {
 	}
 	teamB = [];
 	teamR = [];
-	const shuffledArr = FisherYeet([...memberMap.keys()]);
+	const carryPlayerArr = [], casualPlayerArr = [];
+	memberMap.forEach((member, id) => {
+		let isCarryPlayer = false;
+		member.roles.cache.forEach(role => {
+			if(role.name===R6CARRYROLENAME){
+				isCarryPlayer = true;
+			}
+		});
+		if(isCarryPlayer){
+			carryPlayerArr.push(id);
+		}else{
+			casualPlayerArr.push(id);
+		}
+	}) 
+	const shuffledArr = [...FisherYeet(carryPlayerArr), ...FisherYeet(casualPlayerArr)];
 	for(let i in shuffledArr){
 		if(i%2===0){
 			teamB.push(shuffledArr[i]);
@@ -49,7 +84,7 @@ const moveIntoVC = (msg) => {
 		utils.sendAndLog("Teams have not been assigned yet!", msg);
 		return ;
 	}
-	let promiseB = [], promiseR = [];
+	const promiseB = [], promiseR = [];
 	teamB.forEach(id =>{
 		msg.guild.members.fetch(id).then(member => {
 			promiseB.push(member.voice.setChannel(R6BLEU));
@@ -72,7 +107,7 @@ const gatherUp = (msg) => {
 		utils.sendAndLog("Teams are not divided yet!", msg);
 		return ;
 	}
-	let promiseAll = [];
+	const promiseAll = [];
 	teamR.forEach( id => {
 		msg.guild.members.fetch(id).then(member => {
 			promiseAll.push(member.voice.setChannel(R6BLEU));
@@ -120,6 +155,7 @@ const FisherYeet = (origArr) => {
 
 module.exports = {
     fiveVFive,
+	excludePlayer,
     assignTeam,
     moveIntoVC,
     gatherUp,
