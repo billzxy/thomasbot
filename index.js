@@ -90,7 +90,7 @@ bot.on("message", function(message){
 				break;
 
 			case "exclude":
-				r6shuffle.fiveVFive(message);
+				r6shuffle.excludePlayer(message);
 				break;
 
 			case "divide":
