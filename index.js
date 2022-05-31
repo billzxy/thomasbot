@@ -130,18 +130,29 @@ bot.on("message", function(message){
 				break;
 			
 			case "why":
-				const whyIndex = Math.floor(Math.random() * Math.floor(4));
+				// const whyIndex = Math.floor(Math.random() * Math.floor(4));
 				const whysource = `./resources/why0.mp3`;
 				playMP3(message, whysource);
 				break;
+			// case "gey":
+			// 	playMP3(message, `./resources/why1.mp3`);
+			// 	break;
 
-			case "gey":
-				playMP3(message, `./resources/why1.mp3`);
+			case "nade":
+				playMP3(message, `./resources/tarkov/tarkov1.mp3`);
 				break;
 
-			case "tarkov":
-				tarkovTrolling(message);
+			case "suka":
+				playMP3(message, `./resources/tarkov/tarkov0.mp3`);
 				break;
+
+			// case "cheeks":
+			// 	playMP3(message, `./resources/tarkov/tarkov.mp3`);
+			// 	break;
+			
+			// case "salsa":
+			// 	playMP3 (message, `./resources/tarkov/tarkov0.mp3`);
+			// 	break;
 
 			default:
 				message.channel.send("That command, miao doesn't understand.")
