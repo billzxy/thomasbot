@@ -130,29 +130,77 @@ bot.on("message", function(message){
 				break;
 			
 			case "why":
-				// const whyIndex = Math.floor(Math.random() * Math.floor(4));
 				const whysource = `./resources/why0.mp3`;
 				playMP3(message, whysource);
 				break;
-			// case "gey":
-			// 	playMP3(message, `./resources/why1.mp3`);
-			// 	break;
 
 			case "nade":
-				playMP3(message, `./resources/tarkov/tarkov1.mp3`);
+				playMP3(message, `./resources/tarkov/grenade.mp3`);
+				break;
+
+			case "dickyNeedles":
+				playMP3(message, `./resources/tarkov/dicky.mp3`);
+				break;
+
+			case "buckleUp":
+				playMP3(message, `./resources/tarkov/buckleup0.mp3`);
+				break;
+
+			case "opachki":
+				playMP3(message, `./resources/tarkov/opachki0.mp3`);
 				break;
 
 			case "suka":
-				playMP3(message, `./resources/tarkov/tarkov0.mp3`);
+				playTarkov(message, "suka", 3);
 				break;
 
-			// case "cheeks":
-			// 	playMP3(message, `./resources/tarkov/tarkov.mp3`);
-			// 	break;
+			case "cheeki":
+				playTarkov(message, "cheeki", 2);
+				break;
+
+			case "cheeks":
+				playTarkov(message, "cheeks", 5);
+				break;
+
+			case "cry":
+				playTarkov(message, "cry", 1);
+				break;
 			
-			// case "salsa":
-			// 	playMP3 (message, `./resources/tarkov/tarkov0.mp3`);
-			// 	break;
+			case "gege":
+				playTarkov(message, "gg", 2);
+				break;
+
+			case "laugh":
+				playTarkov(message, "laugh", 5);
+				break;
+
+			case "macaroni":
+				playTarkov(message, "macaroni", 2);
+				break;
+
+			case "hoyo":
+				playTarkov(message, "okhuenno", 5);
+				break;	
+
+			case "bababam":
+				playTarkov(message, "papapam", 2);
+				break;
+
+			case "salsa":
+				playTarkov(message, "salsa", 6);
+				break;
+
+			case "sashimi":
+				playTarkov(message, "sashimi", 3);
+				break;
+
+			case "shoesAreClean":
+				playTarkov(message, "shoesareclean", 2);
+				break;
+
+			case "nukeScav":
+				playMP3(message, `./resources/tarkov/superlong.mp3`);
+				break;
 
 			default:
 				message.channel.send("That command, miao doesn't understand.")
@@ -245,11 +293,9 @@ const sendInfo = (msg) => {
 	)
 }
 
-const tarkovTrolling = (msg) => {
-	// const audioPath = path.join(__dirname, 'resources/tarkov');
-	// const audioFiles = fs.readdirSync(audioPath);
-	const randomIndex = Math.floor(Math.random() * Math.floor(3));
-	playMP3(msg, `./resources/tarkov/tarkov${randomIndex}.mp3`);
+const playTarkov = (msg, command, count) => {
+	const randomIndex = Math.floor(Math.random() * Math.floor(count));
+	playMP3(msg, `./resources/tarkov/${command}${randomIndex}.mp3`);
 }
 
 const playMP3 = (msg, source) => {
