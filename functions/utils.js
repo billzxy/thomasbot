@@ -1,7 +1,7 @@
 
 
 const sendAndLog = (msg, origMsg) => {
-	origMsg.channel.send(msg).then(consoleLog(origMsg)).catch(console.error);;
+	origMsg.channel.send(msg).then(consoleLog(origMsg)).catch(console.error);
 }
 
 const consoleLog = (msg) => {
