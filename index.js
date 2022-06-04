@@ -7,6 +7,7 @@ require('dotenv').config();
 const r6shuffle = require('./functions/r6shuffle');
 const utils = require("./functions/utils");
 const reserve = require("./functions/reservation");
+const rules = require("./functions/rules");
 const fs = require('fs');
 const path = require('path');
 const { execute } = require("./functions/tts/tts-commands/say");
@@ -51,7 +52,7 @@ bot.on("error", (error) =>console.log(error));
 //main loop
 bot.on("message", function(message){
 	let toWhomID = message.author.id;
-	const { isExclusive, bindId} = message.guild.ttsPlayer.config;
+	const { isExclusive, bindId } = message.guild.ttsPlayer.config;
 
 	if(message.author.equals(bot.user))
 		return;
@@ -77,6 +78,10 @@ bot.on("message", function(message){
 
 			case "info":
 				sendInfo(message);
+				break;
+
+			case "rules":
+				rules.sendRules(message);
 				break;
 
 			case "meow":
