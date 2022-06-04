@@ -187,7 +187,7 @@ const sendRules = async (msg) => {
 	await msg.channel.send({embed: introEmbed, files: [thumbnail]}).then(utils.consoleLog(msg)).catch(console.error);
 	await msg.channel.send({embed: basicLawEmbed}).then(utils.consoleLog(msg)).catch(console.error);
 	await msg.channel.send({embed: dosEmbed}).then(utils.consoleLog(msg)).catch(console.error);
-	await msg.channel.send({embed: dontsEmbed}).then(cutils.onsoleLog(msg)).catch(console.error);
+	await msg.channel.send({embed: dontsEmbed}).then(utils.consoleLog(msg)).catch(console.error);
 	await msg.channel.send({embed: disclaimerEmbed}).then(utils.consoleLog(msg)).catch(console.error);
 
 }
