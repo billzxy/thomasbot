@@ -53,19 +53,19 @@ const sendRules = async (msg) => {
 		description: '请阅读并遵守以下基本法条例\n'+'Please read and abide by the Basic Law',
 		fields: [
 			{
-				name: '基本行为准则',
+				name: '⚖️ 基本行为准则',
 				value: '请尊重其他街民，做一个友善的、有礼貌的、亦可赛艇的街民。'
 			},
 			{
-				name: 'Basic Code of Conduct',
+				name: '⚖️ Basic Code of Conduct',
 				value: 'Please be respectful, friendly, polite, and exciting/excited.',
 			},
 			{
-				name: '⚠️惩戒措施',
+				name: '⚠️ 惩戒措施',
 				value: '违法者将会受到惩戒。根据情节严重性，违法违纪者将会受到暂时性（或永久性）的：*禁言*、*收回特殊访问和权限许可*、*收回户籍及访问许可*、*赛博驱逐离街*等惩罚！'
 			},
 			{
-				name: '⚠️Disciplinary Actions',
+				name: '⚠️ Disciplinary Actions',
 				value: 'Those who break the law shall be punished. Perpetrators will be temporarily(or permanently): *timed-out*, *having special access permissions revoked*, *having residency permit revoked*, *cyberly deported*, et cetera.',
 			},
 		],
@@ -76,27 +76,27 @@ const sendRules = async (msg) => {
 		title: '🉑 Do\'s',
 		fields: [
 			{
-				name: '请尊重',
+				name: '✔️请尊重',
 				value: '我们能自豪地宣称：我们的街道是开放包容的；社区群体由多个性别、多种性向、多个族群、多个国籍、多种复杂背景的朋友们组成；请尊重其他人的权益、权利、主张、观点、相貌、爱好、性癖等。',
 			},
 			{
-				name: '请分享',
+				name: '✔️请分享',
 				value: '分享：资讯、梗图、音乐、游戏相关内容、自制游戏精彩合集、政治讨论、促销打折商品、汽车赛车内容、猫猫狗狗、飞机坦克、涩图（仅限特定频道）等',
 			},
 			{
-				name: '请交流',
+				name: '✔️请交流',
 				value: '欢迎随时进入语音频道聊天吹🅱️',
 			},
 			{
-				name: 'Respect',
+				name: '✔️Respect',
 				value: 'This proudly open and tolerant community consists of friends of different genders, sexualities, ethnicities, nationalities, and complex backgrounds. Respect others\' rights, opinions, hobbies, and kinks.',
 			},
 			{
-				name: 'Share',
+				name: '✔️Share',
 				value: 'Share news, memes, emotes, music, gaming contents, game clips, politics, deals, cars, racing stuffs, cats, dogs, pets, tanks, props, jets, and NSFW stuffs (only in NSFW channels plz).',
 			},
 			{
-				name: 'Communicate',
+				name: '✔️Communicate',
 				value: 'You are welcomed to join voice channel any time and chat!',
 			},
 		]
@@ -107,31 +107,31 @@ const sendRules = async (msg) => {
 		title: '🈲 Don\'ts',
 		fields: [
 			{
-				name: '不尊重人',
+				name: '❌不尊重人',
 				value: '小朋友都知道应该怎么做',
 			},
 			{
-				name: '不和平讨论',
+				name: '❌不和平讨论',
 				value: '允许讨论和争执，但请控制住情绪，就事论事；请不要煽风点火，禁止（逻辑学意义上的）人身攻击，严禁使用污言秽语骂人！！',
 			},
 			{
-				name: '乱发涩图',
+				name: '❌乱发涩图',
 				value: '不要在不该发涩图的地方发涩图！！Discord官方审核机制会介入的！！',
 			},
 			{
-				name: '炸麦',
+				name: '❌炸麦',
 				value: '偶然性炸麦并非人为可控事件，但还请照顾其他同志的听力健康；如果被指出有电流麦、炸麦，请及时自行闭麦或者修复。',
 			},
 			{
-				name: 'Disrespect',
+				name: '❌Disrespect',
 				value: 'You should know it by now',
 			},
 			{
-				name: 'Heated Discussions Go South',
+				name: '❌Heated Discussions Go South',
 				value: 'Discussions and debates are allowed. However, please control your emotions and keep the boundaries in check. Do not add fuel to the fire. Ad hominem is not acceptable. Absolutly never will namecalling ever be allowed.',
 			},
 			{
-				name: 'Nuclear Microphone',
+				name: '❌Nuclear Microphone',
 				value: 'Please control your microphone input volume (or simply mute your mic) if someone points out that your mic is making disturbing noises.',
 			},
 		]
