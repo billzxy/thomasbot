@@ -184,11 +184,11 @@ const sendRules = async (msg) => {
 		name: 'building.jpg'
 	};
 
-	await msg.channel.send({embed: introEmbed, files: [thumbnail]}).then(consoleLog(msg)).catch(console.error);
-	await msg.channel.send({embed: basicLawEmbed}).then(consoleLog(msg)).catch(console.error);
-	await msg.channel.send({embed: dosEmbed}).then(consoleLog(msg)).catch(console.error);
-	await msg.channel.send({embed: dontsEmbed}).then(consoleLog(msg)).catch(console.error);
-	await msg.channel.send({embed: disclaimerEmbed}).then(consoleLog(msg)).catch(console.error);
+	await msg.channel.send({embed: introEmbed, files: [thumbnail]}).then(utils.consoleLog(msg)).catch(console.error);
+	await msg.channel.send({embed: basicLawEmbed}).then(utils.consoleLog(msg)).catch(console.error);
+	await msg.channel.send({embed: dosEmbed}).then(utils.consoleLog(msg)).catch(console.error);
+	await msg.channel.send({embed: dontsEmbed}).then(cutils.onsoleLog(msg)).catch(console.error);
+	await msg.channel.send({embed: disclaimerEmbed}).then(utils.consoleLog(msg)).catch(console.error);
 
 }
 
