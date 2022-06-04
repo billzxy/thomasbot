@@ -22,7 +22,7 @@ const sendRules = (msg) => {
 			{
 				name: '🔗 邀请好友',
 				value: `[**邀请链接**](${SERVER_INVITE_LINK})`
-			}
+			},
 			{
 				name: '🏙️ About the Street',
 				value: ' This is a community formed by, maintained by, funded by, and created for friends and comrades. Friends and comrades are welcomed to hang out, play games, and meme around.'
