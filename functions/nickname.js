@@ -21,7 +21,7 @@ const changeNickname = () => {
 
 const setGlobalGuildAndTargetMember = async botClient => {
     global_home_guild = await botClient.guilds.fetch(HOME_GUILD_ID);
-    global_nickname_member = await guild.members.fetch(NICKNAME_MEMBER_ID);
+    global_nickname_member = await global_home_guild.members.fetch(NICKNAME_MEMBER_ID);
 }
 
 const toggleAutoNickname = async () => {
