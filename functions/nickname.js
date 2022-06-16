@@ -11,6 +11,10 @@ let global_nickname_member = null;
 
 
 const changeNickname = () => {
+    if(!global_home_guild.me.hasPermission('MANAGE_NICKNAMES')){
+        console.log("Thomas does not have the MANAGE_NICKNAMES permission!")
+        return;
+    }
     if(!global_nickname_member){
         setGlobalGuildAndTargetMember();
     }
@@ -21,7 +25,12 @@ const changeNickname = () => {
 
 const setGlobalGuildAndTargetMember = async botClient => {
     global_home_guild = await botClient.guilds.fetch(HOME_GUILD_ID);
+    console.log("Home guild is: ", global_home_guild.name);
     global_nickname_member = await global_home_guild.members.fetch(NICKNAME_MEMBER_ID);
+    console.log("Target guild member is, ", global_nickname_member.nickname)
+    if(!global_home_guild.me.hasPermission('MANAGE_NICKNAMES')){
+        console.log("Thomas does not have the MANAGE_NICKNAMES permission!")
+    }
 }
 
 const toggleAutoNickname = async () => {

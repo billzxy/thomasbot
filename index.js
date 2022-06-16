@@ -217,6 +217,10 @@ bot.on("message", function(message){
 				nickname.toggleAutoNickname();
 				break;
 
+			case "nicknameReset":
+				nickname.setGlobalGuildAndTargetMember();
+				break;
+
 			default:
 				message.channel.send("That command, miao doesn't understand.")
 				.then(utils.consoleLog(message)).catch(console.error);
