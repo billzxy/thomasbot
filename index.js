@@ -218,7 +218,7 @@ bot.on("message", function(message){
 				break;
 
 			case "nicknameReset":
-				nickname.setGlobalGuildAndTargetMember();
+				nickname.setGlobalGuildAndTargetMember(bot);
 				break;
 
 			default:
