@@ -8,7 +8,7 @@ const consoleLog = (msg) => {
 	console.log(msg.author.username+"@"+msg.guild.name+": "+msg.content);
 }
 
-module.exports ={
+module.exports = {
     sendAndLog,
     consoleLog
 }

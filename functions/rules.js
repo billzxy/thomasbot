@@ -192,6 +192,6 @@ const sendRules = async (msg) => {
 
 }
 
-module.exports ={
+module.exports = {
     sendRules
 }

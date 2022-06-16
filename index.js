@@ -10,6 +10,7 @@ const reserve = require("./functions/reservation");
 const rules = require("./functions/rules");
 const fs = require('fs');
 const path = require('path');
+const nickname = require("./functions/nickname");
 const { execute } = require("./functions/tts/tts-commands/say");
 
 const TOKEN = process.env.DISCORD_TOKEN;
@@ -34,6 +35,7 @@ bot.on("ready",function(){
 	bot.guilds.cache.each((guild) => {
 		guild.ttsPlayer = new TTSPlayer(guild, new TTS_CONF());
 	});
+	nickname.setGlobalGuildAndTargetMember(bot);
 	if(MODE && MODE==="dev"){
 		bot.user.setPresence({
 			status: 'dnd',
@@ -205,6 +207,14 @@ bot.on("message", function(message){
 
 			case "nukeScav":
 				playMP3(message, `./resources/tarkov/superlong.mp3`);
+				break;
+
+			case "son":
+				nickname.changeNickname();
+				break;
+
+			case "toggle":
+				nickname.toggleAutoNickname();
 				break;
 
 			default:
